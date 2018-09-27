@@ -21,7 +21,7 @@ $app->get('/', function() {
 
 });
 #rota da página de admin
-$app->get('/admin', function() {
+$app->get('/admin/', function() {
 #precisa validar se a pessoa está logada
 	#criando um método statico que verifica isso
 	User::verifyLogin();
@@ -215,8 +215,13 @@ $app->post("/admin/forgot/reset", function(){
 	$user = new User();
 
 	$user->get((int)$forgot["iduser"]);
+	#criptografando a senha
+	$password = password_hash($_POST["password"],PASSWORD_DEFAULT,[
+			"cost"=>12
+	]);
+
 	#método pra salvar a senha do reset
-	$user->setPassword($_POST["password"]);
+	$user->setPassword($password);
 	#mostrar a confirmação do reset
 	$page = new PageAdmin([
 			#desabilitando o header e o footer padrão
