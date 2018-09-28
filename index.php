@@ -8,6 +8,7 @@ use \Slim\Slim;
 use \Hcode\Page;
 use \Hcode\PageAdmin;
 use \Hcode\Model\User;
+use \Hcode\Model\Category;
 #rota, criando uma nova aplicação
 $app = new Slim();
 
@@ -230,6 +231,39 @@ $app->post("/admin/forgot/reset", function(){
 		]);
 
 	$page->setTpl("forgot-reset-success");
+
+});
+#rota para acessar o template de categoria
+$app->get("/admin/categories", function(){
+	#Precisa criar uma classe category
+	$categories = Category::listAll();
+
+	$page = new PageAdmin();
+
+	$page->setTpl("categories",[
+		'categories'=>$categories
+	]);
+
+});
+#rota para acessar o template de criar categoria
+$app->get("/admin/categories/create", function(){
+	
+	$page = new PageAdmin();
+
+	$page->setTpl("categories-create");
+
+});
+#rota pra criar a categoria
+$app->post("/admin/categories/create", function(){
+	
+	$category = new Category();
+	#vai pegar os dados do post e setar
+	$category->setData($_POST);
+	#salvar
+	$category->save();
+
+	header('Location: /admin/categories');
+	exit;
 
 });
 
