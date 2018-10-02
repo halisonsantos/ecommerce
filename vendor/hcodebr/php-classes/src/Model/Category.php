@@ -23,12 +23,34 @@ class Category extends Model{
 		$sql = new Sql();
 
 		$results = $sql->select("CALL sp_categories_save(:idcategory, :descategory)", array(
-			":idcategory"=>getidcategory(),
-			":descategory"=>getdescategory()
+			":idcategory"=>$this->getidcategory(),
+			":descategory"=>$this->getdescategory()
 		));
 		#retorna uma linha de resultados e coloca nesse setData
 		$this->setData($results[0]);
 
+	}
+	#
+	public function get($idcategory)
+	{
+
+		$sql = new Sql();
+
+		$results = $sql->select("SELECT * FROM tb_categories WHERE idcategory = :idcategory",[
+			':idcategory'=>$idcategory
+		]);
+		#o resultado será aplicado no indice 0
+		$this->setData($results[0]);
+
+	}
+	#delete
+	public function delete()
+	{
+		$sql = new Sql();
+
+		$sql->query("DELETE FROM tb_categories WHERE idcategory = :idcategory",[
+			':idcategory'=>$this->getidcategory()
+		]);
 	}
 
 }
