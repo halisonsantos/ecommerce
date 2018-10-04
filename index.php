@@ -318,7 +318,23 @@ $app->post("/admin/categories/:idcategory", function($idcategory){
 	header('Location: /admin/categories');
 	exit;
 });
+#rotas das categorias da página inicial ao clicar
+$app->get("/categories/:idcategory", function($idcategory){
 
+	$category = new Category();
+	#carregando a categoria
+	$category->get((int)$idcategory);
+	#volta a página do site
+	$page = new Page();
+
+	$page->setTpl("category",[
+		'category'=>$category->getValues(),
+		'products'=>[]
+
+	]);
+
+
+});
 
 
 

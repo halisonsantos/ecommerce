@@ -28,6 +28,8 @@ class Category extends Model{
 		));
 		#retorna uma linha de resultados e coloca nesse setData
 		$this->setData($results[0]);
+		#Atualizando as categorias no site principal
+		Category::updateFile();
 
 	}
 	#
@@ -51,6 +53,21 @@ class Category extends Model{
 		$sql->query("DELETE FROM tb_categories WHERE idcategory = :idcategory",[
 			':idcategory'=>$this->getidcategory()
 		]);
+		#Atualizando as categorias no site principal
+		Category::updateFile();
+	}
+	#método que atualiza as categorias do site
+	public static function updateFile()
+	{
+		#quais as categorias que tem no banco de dados
+		$categories = Category::listAll();
+		#montar o html
+		$html = [];
+		foreach ($categories as $row) {
+			array_push($html, '<li><a href="/categories/'.$row['idcategory'].'">'.$row['descategory'].'</a></li>');
+		}
+		#salvando o arquivo
+		file_put_contents($_SERVER['DOCUMENT_ROOT'].DIRECTORY_SEPARATOR."views".DIRECTORY_SEPARATOR."categories-menu.html", implode('', $html));
 	}
 
 }
