@@ -52,7 +52,8 @@ $app->get("/admin/products/:idproduct", function($idproduct){
 	#passar os dados para o template
 	$page->setTpl("products-update",[
 		'product'=>$product->getValues()
-]);
+	]);
+});
 #altera as informações do produto
 $app->post("/admin/products/:idproduct", function($idproduct){
 	#verifica login
@@ -66,12 +67,26 @@ $app->post("/admin/products/:idproduct", function($idproduct){
 
 	$product->save();
 	#fazer o upload do arquivo
-	$product->setPhoto($_FILES["name"]);
+	$product->setPhoto($_FILES["file"]);
 	#redireciona para a tela de produtos
 	header('Location: /admin/products');
 	exit;
 
 });
+#deletar um produto
+$app->get("/admin/products/:idproduct/delete", function($idproduct){
+	#verifica login
+	User::verifyLogin();
+	#cria um novo produto
+	$product = new Product();
 
+	$product->get((int)$idproduct);
+
+	$product->delete();
+
+	header('Location: /admin/products');
+	exit;
+
+});
 
 ?>
