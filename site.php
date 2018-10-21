@@ -17,17 +17,30 @@ $app->get('/', function() {
 });
 #rotas das categorias da página inicial ao clicar
 $app->get("/categories/:idcategory", function($idcategory){
+	#se o usuário clicar na página será definido o número da página se não o parão é 1
+	$page = (isset($_GET['page']))? (int)$_GET['page'] : 1;
 
 	$category = new Category();
 	#carregando a categoria
 	$category->get((int)$idcategory);
+	#várias informações dentro do array e recebe a página definida
+	$pagination = $category->getProductsPage($page);
+	#criando o array pages
+	$pages = [];
+	#o laço vai até o total de páginas com o link da página e o número da página
+	for ($i=1; $i <= $pagination['pages']; $i++) { 
+		array_push($pages, [
+			'link'=>'/categories/'.$category->getidcategory().'?page='.$i,
+			'page'=>$i
+		]);
+	}
 	#volta a página do site
 	$page = new Page();
 
 	$page->setTpl("category",[
 		'category'=>$category->getValues(),
-		'products'=>Product::checkList($category->getProducts())
-
+		'products'=>$pagination["data"],
+		'pages'=>$pages
 	]);
 });
 
