@@ -43,5 +43,19 @@ $app->get("/categories/:idcategory", function($idcategory){
 		'pages'=>$pages
 	]);
 });
+#rota dos detalhes do produto
+$app->get("/products/:desurl",function($desurl){
+	#instanciando produto
+	$product = new Product();
+	#
+	$product->getFromURL($desurl);
+	#instanciando uma nova pagina 
+	$page = new Page();
+	#tamplate sendo chamado
+	$page->setTpl("product-detail",[
+		'product'=>$product->getValues(),
+		'categories'=>$product->getCategories()
+	]);
+});
 
 ?>

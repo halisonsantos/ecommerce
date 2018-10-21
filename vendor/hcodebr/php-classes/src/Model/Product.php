@@ -132,6 +132,32 @@ class Product extends Model{
 		$this->checkPhoto();
 
 	}
+	#busca os dados do produto através de sua url previamente configurada
+	public function getFromURL($desurl)
+	{
+		#instancia uma nova conexão com o banco
+		$sql = new Sql();	
+		#seleciona os dados do produto que for igual a desurl
+		$rows = $sql->select("SELECT * FROM tb_products WHERE desurl = :desurl LIMIT 1",[
+			':desurl'=>$desurl
+		]);
+		#colocando as informações dentro do proprio objeto da primeira linha
+		$this->setData($rows[0]);
+
+	}
+	#busca as categorias que o produto está relacionado
+	public function getCategories()
+	{
+
+		$sql = new Sql();
+
+		return $sql->select("
+			SELECT * FROM tb_categories a INNER JOIN tb_productscategories b ON a.idcategory = b.idcategory WHERE b.idproduct = :idproduct
+		",[
+			':idproduct'=>$this->getidproduct()
+		]);
+
+	}
 
 }
 
