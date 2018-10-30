@@ -11,6 +11,50 @@ class User extends Model{
 	const SESSION = "User";
 	#chave de criptografia 
 	const SECRET = "HcodePhp7_Secret";
+	#método pra carregar o usuário pro carrinho
+	public static function getFromSession()
+	{
+		#cria um objeto
+		$user = new User();
+		#verificar se a sessão existe
+		if(isset($_SESSION[User::SESSION]) && (int)$_SESSION[User::SESSION]['iduser'] > 0){
+			#carrega o usuário
+			$user->setData($_SESSION[User::SESSION]);
+		} 
+		#retorna o usuário
+		return $user;
+	}
+	#checar se está logado
+	public function checkLogin($inadmin = true)
+	{
+		if(
+			#verifica se não foi definida a session com a constante session
+			!isset($_SESSION[User::SESSION])
+			||#ou se ela for falsa
+			!$_SESSION[User::SESSION]
+			||#ou se o id do usuário não for maior que 0
+			!(int)$_SESSION[User::SESSION]["iduser"] > 0
+		){	
+			#não está logado
+			return false;
+		}else{
+			#verifica se está na rota da adm e se é um adm
+			if($inadmin === true && (bool)$_SESSION[User::SESSION]['inadmin'] === true){
+
+				return true;
+			#ele está logado mas não é necessáriamente um adm
+			}else if($inadmin === false){
+
+				return true;
+			#se algo não saiu como previsto o usuário não está logado
+			}else{
+
+				return false;
+
+			}
+
+		}
+	}
 
 	#esse método vai verificar se o login e senha existe no banco 
 	public static function login($login, $password){
@@ -47,18 +91,8 @@ class User extends Model{
 
 	public static function verifyLogin($inadmin = true)
 	{
-
-		if(
-			#verifica se não foi definida a session com a constante session
-			!isset($_SESSION[User::SESSION])
-			||#ou se ela for falsa
-			!$_SESSION[User::SESSION]
-			||#ou se o id do usuário não for maior que 0
-			!(int)$_SESSION[User::SESSION]["iduser"] > 0
-			||
-			#precisa saber se é um admin
-			(bool)$_SESSION[User::SESSION]["inadmin"] !== $inadmin
-		){
+		#verifica realiza as validações do login
+		if(User::checkLogin($inadmin)){
 			#redirecionar para a tela de login
 			header("Location: /admin/login");
 			exit;
