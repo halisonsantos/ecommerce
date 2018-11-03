@@ -65,8 +65,58 @@ $app->get("/cart", function(){
 
 	$page = new Page();
 
-	$page->setTpl("cart");
+	$page->setTpl("cart",[
+		'cart'=>$cart->getValues(),
+		'products'=>$cart->getProducts()
+	]);
 
+});
+#rota para adicionar produto no carrinho
+$app->get("/cart/:idproduct/add", function($idproduct){
+	#instancia um novo produto
+	$product = new Product();
+	#carrega o id do produto
+	$product->get((int)$idproduct);
+	#recupera o carrinho da sessão ou cria um novo
+	$cart = Cart::getFromSession();
+	#se qtd existir vale a quantidade enviada, se não é 1
+	$qtd = (isset($_GET['qtd'])) ? (int)$_GET['qtd'] : 1;
+	#assim chama o método quantas vezes for necessário executa-lo
+	for ($i=0; $i < $qtd; $i++) { 
+		#adiciona os produtos no carrinho
+		$cart->addProduct($product);
+	}
+	#redireciona para o carrinho
+	header("Location: /cart");
+	exit;
+});
+#rota para "remover" produtos no carrinho
+$app->get("/cart/:idproduct/minus", function($idproduct){
+	#instancia um novo produto
+	$product = new Product();
+	#carrega o id do produto
+	$product->get((int)$idproduct);
+	#recupera o carrinho da sessão ou cria um novo
+	$cart = Cart::getFromSession();
+	#remove uma unidade do produto no carrinho
+	$cart->removeProduct($product);
+	#redireciona para o carrinho
+	header("Location: /cart");
+	exit;
+});
+#rota para "remover" todos os produtos no carrinho
+$app->get("/cart/:idproduct/remove", function($idproduct){
+	#instancia um novo produto
+	$product = new Product();
+	#carrega o id do produto
+	$product->get((int)$idproduct);
+	#recupera o carrinho da sessão ou cria um novo
+	$cart = Cart::getFromSession();
+	#remove todos os  produtos do mesmo tipo do carrinho
+	$cart->removeProduct($product, true);
+	#redireciona para o carrinho
+	header("Location: /cart");
+	exit;
 });
 
 ?>
