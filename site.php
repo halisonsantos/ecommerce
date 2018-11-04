@@ -67,7 +67,8 @@ $app->get("/cart", function(){
 
 	$page->setTpl("cart",[
 		'cart'=>$cart->getValues(),
-		'products'=>$cart->getProducts()
+		'products'=>$cart->getProducts(),
+		'error'=>Cart::getMsgError()
 	]);
 
 });
@@ -115,6 +116,16 @@ $app->get("/cart/:idproduct/remove", function($idproduct){
 	#remove todos os  produtos do mesmo tipo do carrinho
 	$cart->removeProduct($product, true);
 	#redireciona para o carrinho
+	header("Location: /cart");
+	exit;
+});
+#rota para passar os valores totais dos produtos do carrinho para calculo do frete
+$app->post("/cart/freight", function(){
+	#recupera o carrinho da sessão ou cria um novo
+	$cart = Cart::getFromSession();
+	#chamando médoto pra passar o cep
+	$cart->setFreight($_POST['zipcode']);
+
 	header("Location: /cart");
 	exit;
 });
