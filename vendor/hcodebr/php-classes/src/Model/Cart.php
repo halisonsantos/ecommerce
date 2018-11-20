@@ -116,6 +116,8 @@ class Cart extends Model{
 			':idcart'=>$this->getidcart(),
 			':idproduct'=>$product->getidproduct()
 		]);
+		#calcula .. chamamos pq dentro dele atualiza o frete
+		$this->getCalculateTotal();
 	}
 	#remove produtos do carrinho
 	public function removeProduct(Product $product, $all = false)
@@ -136,6 +138,8 @@ class Cart extends Model{
 				'idproduct'=>$product->getidproduct()
 			]);
 		}
+		#calcula .. chamamos pq dentro dele atualiza o frete
+		$this->getCalculateTotal();
 	}
 	#lista os produtos adicionados no carrinho
 	public function getProducts()
@@ -166,7 +170,7 @@ class Cart extends Model{
 			SELECT SUM(vlprice) AS vlprice, SUM(vlwidth) AS vlwidth, SUM(vlheight) AS vlheight, SUM(vllength) AS vllength, SUM(vlweight) AS vlweight, COUNT(*) AS nrqtd
 			FROM tb_products a
 			INNER JOIN tb_cartsproducts b ON a.idproduct = b.idproduct
-			WHERE b.idcart = :idcart AND dtremoved IS NULL
+			WHERE b.idcart = :idcart AND dtremoved IS NULL;
 		",[
 			':idcart'=>$this->getidcart()
 		]);
@@ -181,7 +185,7 @@ class Cart extends Model{
 	#função para enviar os dados para calculo de frete no webservice
 	public function setFreight($nrzipcode)
 	{
-		#tirar o ífem caso ele esja digitado
+		#tirar o hífem caso ele esja digitado
 		$nrzipcode = str_replace('-', '', $nrzipcode);
 		# retorna as medidas totais dos produtos do carrinho
 		$totals = $this->getProductsTotals();
@@ -208,7 +212,7 @@ class Cart extends Model{
 				'sCdAvisoRecebimento'=>'S'
 			]);
 			#função para ler xml pois o webservice vai retornar no formato xml
-			$xml = simplexml_load_file(utf8_encode("http://ws.correios.com.br/calculador/CalcPrecoPrazo.asmx/CalcPrecoPrazo?".$qs));
+			$xml = simplexml_load_file("http://ws.correios.com.br/calculador/CalcPrecoPrazo.asmx/CalcPrecoPrazo?".$qs);	
 			#acessar o objeto 
 			$result = $xml->Servicos->cServico;
 			#Caso mostre alguma mensagem de erro vamos tratar
@@ -265,6 +269,36 @@ class Cart extends Model{
 	{
 		$_SESSION[Cart::SESSION_ERROR] = NULL;
 	}
+	#função para atualizar o carrinho
+	public function updateFreight()
+	{
+		#se o cep for diferente de vazio
+		if($this->getdeszipcode() != ''){
+			#chama o calculo de frete passando o cep
+			$this->setFreight($this->getdeszipcode());
+		}
+	}
+	#Função para trazer o total dos produto e o total com frete ( sobescrevendo)
+	public function getValues(){
+		#calcula o total
+		$this->getCalculateTotal();
+		#estende o que o pai ja faz
+		return parent::getValues();
+	}
+	#fução para calcular o total do carrinho
+	public function getCalculateTotal()
+	{
+		#atualiza o frete
+		$this->updateFreight();
+		#Tras o tatal do carrinho
+		$totals = $this->getProductsTotals();
+		#total do produto
+		$this->setvlsubtotal($totals['vlprice']);
+		#total do produto com frete
+		$this->setvltotal($totals['vlprice'] + $this->getvlfreight());
+
+	}
+
 
 
 }
